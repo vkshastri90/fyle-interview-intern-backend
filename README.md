@@ -1,4 +1,18 @@
-# Fyle Backend Challenge
+# Successfully Completed, <mark>Fyle Backend Challenge</mark>
+
+## All Test Cases Passed
+<p align="center">
+  <a href="https://shub.pythonanywhere.com/profile">
+    <img alt="Responsive" src="https://raw.githubusercontent.com/Shubhansh-Simple/fyle-interview-intern-backend/main/Tests-report-screenshots/Screenshot%20-%20pytest%20-vvv%20-s%20tests.png" height="500" /> 
+  </a>
+</p>
+
+## Test Coverage report - 95%
+<p align="center">
+  <a href="https://shub.pythonanywhere.com/profile">
+    <img alt="Responsive" src="https://raw.githubusercontent.com/Shubhansh-Simple/fyle-interview-intern-backend/main/Tests-report-screenshots/Screenshot%20-%20pytest%20--cov%20(95%25%20test%20coverage).png" height="500" /> 
+  </a>
+</p>
 
 ## Who is this for?
 

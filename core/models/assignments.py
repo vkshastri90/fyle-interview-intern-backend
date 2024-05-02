@@ -25,8 +25,8 @@ class Assignment(db.Model):
     id = db.Column(db.Integer, db.Sequence('assignments_id_seq'), primary_key=True)
     student_id = db.Column(db.Integer, db.ForeignKey(Student.id), nullable=False)
     teacher_id = db.Column(db.Integer, db.ForeignKey(Teacher.id), nullable=True)
-    content = db.Column(db.Text)
-    grade = db.Column(BaseEnum(GradeEnum))
+    content = db.Column(db.Text, nullable=False)
+    grade = db.Column(BaseEnum(GradeEnum), nullable=True)
     state = db.Column(BaseEnum(AssignmentStateEnum), default=AssignmentStateEnum.DRAFT, nullable=False)
     created_at = db.Column(db.TIMESTAMP(timezone=True), default=helpers.get_utc_now, nullable=False)
     updated_at = db.Column(db.TIMESTAMP(timezone=True), default=helpers.get_utc_now, nullable=False, onupdate=helpers.get_utc_now)
@@ -64,9 +64,11 @@ class Assignment(db.Model):
         assignment = Assignment.get_by_id(_id)
         assertions.assert_found(assignment, 'No assignment with this id was found')
         assertions.assert_valid(assignment.student_id == auth_principal.student_id, 'This assignment belongs to some other student')
+        assertions.assert_valid(assignment.state == AssignmentStateEnum.DRAFT, 'only a draft assignment can be submitted')
         assertions.assert_valid(assignment.content is not None, 'assignment with empty content cannot be submitted')
 
         assignment.teacher_id = teacher_id
+        assignment.state = AssignmentStateEnum.SUBMITTED
         db.session.flush()
 
         return assignment
@@ -77,6 +79,10 @@ class Assignment(db.Model):
         assignment = Assignment.get_by_id(_id)
         assertions.assert_found(assignment, 'No assignment with this id was found')
         assertions.assert_valid(grade is not None, 'assignment with empty grade cannot be graded')
+        assertions.assert_valid(assignment.state != AssignmentStateEnum.DRAFT, 'assignment with draft status cannot be graded')
+
+        if auth_principal.teacher_id:
+            assertions.assert_valid(assignment.teacher_id == auth_principal.teacher_id, 'This assignment belongs to some other teacher')
 
         assignment.grade = grade
         assignment.state = AssignmentStateEnum.GRADED
@@ -89,5 +95,9 @@ class Assignment(db.Model):
         return cls.filter(cls.student_id == student_id).all()
 
     @classmethod
-    def get_assignments_by_teacher(cls):
-        return cls.query.all()
+    def get_assignments_by_teacher(cls, teacher_id):
+        return cls.filter(cls.teacher_id == teacher_id).all()
+
+    @classmethod
+    def get_submitted_graded_assignments(cls):
+        return cls.filter(cls.teacher_id != None).all()
